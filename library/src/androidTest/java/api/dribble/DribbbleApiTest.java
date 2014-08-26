@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import javax.inject.Inject;
 
+import api.dribble.model.Player;
 import api.dribble.model.Shot;
 import api.dribble.model.Shots;
 import dagger.Module;
@@ -97,7 +98,7 @@ public class DribbbleApiTest extends TestCase {
     }
 
     public void testGetPlayerShots() {
-        Shots shots = service.getPlayerShots("simplebits")
+        Shots shots = service.getShotsForPlayer("simplebits")
                 .toBlocking()
                 .single();
 
@@ -106,7 +107,7 @@ public class DribbbleApiTest extends TestCase {
     }
 
     public void testGetPlayerFollowingShots() {
-        Shots shots = service.getPlayerFollowingShots("frogandcode")
+        Shots shots = service.getFollowingShotsForPlayer("frogandcode")
                 .toBlocking()
                 .single();
 
@@ -115,11 +116,23 @@ public class DribbbleApiTest extends TestCase {
     }
 
     public void testGetPlayerLikesShots() {
-        Shots shots = service.getPlayerFollowingShots("frogandcode")
+        Shots shots = service.getFollowingShotsForPlayer("frogandcode")
                 .toBlocking()
                 .single();
 
         assertNotNull("Total must be present", shots.total);
         assertNotNull("Shots must be present", shots.shots);
     }
+
+    public void testGetPlayer() {
+        final String username = "simplebits";
+        Player player = service.getPlayer(username)
+                .toBlocking()
+                .single();
+
+        assertNotNull("Id must be present", player.id);
+        assertEquals("Username must match", player.username, username);
+    }
+
+
 }
