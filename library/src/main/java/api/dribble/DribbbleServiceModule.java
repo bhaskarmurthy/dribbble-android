@@ -3,12 +3,12 @@ package api.dribble;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.JsonWriter;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 
-import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -40,30 +40,15 @@ public class DribbbleServiceModule {
     DribbbleService provideDribbbleService() {
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .registerTypeAdapter(Date.class, new TypeAdapter<Date>() {
+                .registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
                     private DateFormat format = new SimpleDateFormat("yyyy/mm/dd hh:mm:ss Z");
 
                     @Override
-                    public void write(JsonWriter out, Date value) throws IOException {
-                        if (value == null) {
-                            out.nullValue();
-                            return;
-                        }
-
-                        String dateFormatAsString = format.format(value);
-                        out.value(dateFormatAsString);
-                    }
-
-                    @Override
-                    public Date read(JsonReader in) throws IOException {
-                        if (in.peek() == JsonToken.NULL) {
-                            in.nextNull();
-                            return null;
-                        }
-
+                    public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        String s = json.getAsJsonPrimitive().getAsString();
                         try {
-                            return format.parse(in.nextString());
-                        } catch (ParseException ignored) {
+                            return format.parse(s);
+                        } catch (ParseException ignore) {
                         }
 
                         return null;
